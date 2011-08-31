@@ -57,32 +57,34 @@ object CrashLog extends Logging {
       val stackTrace = params.get("STACK_TRACE")
       var updateObj : MongoDBObject = null;
 
-      if (stackTrace.isDefined) {
-        // do a query
-        log.info("Checking for existing stack trace");
-        val query = MongoDBObject ("STACK_TRACE" -> stackTrace)
-        val existing = Mongo.mongoColl.findOne(query)
+      log.info("New stack trace found")
 
-        // if existing one, up the count
-        updateObj = existing.get
+      // create a new object
+      val builder = MongoDBObject.newBuilder
+      params foreach (param => {
+          builder += param._1 -> param._2
+      })
 
-        // increment the count
-        updateObj ++ $inc("count" -> 1)
+      builder += "count" -> 1
+      updateObj = builder.result()
 
-        // todo: add a new date
-
-      } else {
-        log.info("New stack trace found")
-
-        // create a new object
-        val builder = MongoDBObject.newBuilder
-        params foreach (param => {
-            builder += param._1 -> param._2
-        })
-
-        builder += "count" -> 1
-        updateObj = builder.result()
-      }
+//      if (stackTrace.isDefined) {
+//        // do a query
+//        log.info("Checking for existing stack trace");
+//        val query = MongoDBObject ("STACK_TRACE" -> stackTrace)
+//        val existing = Mongo.mongoColl.findOne(query)
+//
+//        // if existing one, up the count
+//        updateObj = existing.get
+//
+//        // increment the count
+//        updateObj ++ $inc("count" -> 1)
+//
+//        // todo: add a new date
+//
+//      } else {
+//
+//      }
 
       // seems weird, must be a way to set this
       updateObj += ("status" -> "new")
