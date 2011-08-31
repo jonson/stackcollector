@@ -1,0 +1,16 @@
+@(title:String, traces:List[model.CrashLog], items:List[Int])
+
+
+@main(title) {
+    size=@traces.size
+
+    <ul>
+        @for(trace <- traces) {
+            <li>@trace.stackTrace</li>
+        }
+    </ul>
+
+
+}
+
+
