@@ -1,12 +1,11 @@
-@(title:String, traces:List[model.CrashLog], items:List[Int])
+@(traces:List[model.CrashLog])
 
 
-@main(title) {
-    size=@traces.size
+@main("Stack Collector") {
 
     <ul>
         @for(trace <- traces) {
-            <li>@trace.stackTrace</li>
+            <li>@trace.date <a href="@action(controllers.Application.trace(trace.id.get.toString()))">@trace.id.get</a></li>
         }
     </ul>
 

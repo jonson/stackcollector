@@ -6,6 +6,7 @@ import com.mongodb.casbah.Imports._
 import collection.JavaConversions._
 import com.google.gson.Gson
 import util.Logging
+import org.joda.time.DateTime
 
 object CrashLog extends Logging {
 
@@ -32,10 +33,29 @@ object CrashLog extends Logging {
       // json serialization would be better
       val cl = new CrashLog
       cl.stackTrace = obj.getAs[String]("STACK_TRACE")
+      cl.date = obj.getAs[DateTime]("USER_CRASH_DATE")
+      cl.id = obj.getAs[ObjectId]("_id")
       cl
     }
 
     return objs.toList
+  }
+
+  def find ( id : String ) : Option[CrashLog] = {
+    val query = MongoDBObject("_id" -> new ObjectId(id))
+    val obj = Mongo.mongoColl.findOne(query)
+    if (obj.isDefined) {
+      val cl = new CrashLog
+      cl.androidVersion = obj.get.getAs[String]("ANDROID_VERSION")
+      cl.stackTrace = obj.get.getAs[String]("STACK_TRACE")
+      cl.model = obj.get.getAs[String]("PHONE_MODEL")
+      cl.display = obj.get.getAs[String]("DISPLAY")
+      cl.date = obj.get.getAs[DateTime]("USER_CRASH_DATE")
+      cl.id = obj.get.getAs[ObjectId]("_id")
+      return Option(cl)
+    }
+
+    return None
   }
 
   /**
@@ -97,9 +117,11 @@ object CrashLog extends Logging {
 
 }
 
-class CrashLog {
-
+class CrashLog () {
+  var id : Option[ObjectId] = None
   var stackTrace : Option[String] = None
   var androidVersion : Option[String] = None
-
+  var model : Option[String] = None
+  var display : Option[String] = None
+  var date : Option[DateTime] = None
 }

@@ -25,7 +25,18 @@ object Application extends Controller with Logging {
 
     val traces = CrashLog.find
 
-    html.index("Found ! " + traces + " error reports", traces, List(1,2,3));
+    html.index (traces);
+
+  }
+
+  def trace( id: String) = {
+
+
+    val trace = CrashLog.find(id)
+
+    if (trace.isDefined) {
+      html.trace(trace.get)
+    }
 
 
   }
