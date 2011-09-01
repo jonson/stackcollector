@@ -1,8 +1,9 @@
 /* start of ol code block style */
 
-ol.code {
-   margin: 2.5em 2em;
-   padding: 0em;
+ul.code {
+   list-style-type: none;
+   margin: 2em;
+   padding: .1em 1em;
    border: solid 1px #2b91af;
    font-family: "Courier New" , Courier, serif;
    font-weight: bold;
@@ -11,15 +12,9 @@ ol.code {
    line-height: 115%;
    overflow: auto; }
 
-ol.code pre {
-   margin: 0em;
-   padding: 0.3em 0.5em;
-   border-left: solid 1px #2b91af;
-   font-size: 80%;
+ul.code li {
+   font-size: 90%;
    color: #000;
    background: #eee;
-   width: auto; }
-
-ol.code li {
-   margin: 0em 0em 0em 5em;
+   width: auto;
 }

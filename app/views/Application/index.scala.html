@@ -5,7 +5,7 @@
 
     <ul>
         @for(trace <- traces) {
-            <li>@trace.date <a href="@action(controllers.Application.trace(trace.id.get.toString()))">@trace.id.get</a></li>
+            <li>@trace.date <a href="@action(controllers.Application.trace(trace.id.get.toString()))">@trace.id.get</a> @trace.count</li>
         }
     </ul>
 

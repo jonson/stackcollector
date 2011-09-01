@@ -7,6 +7,7 @@ import collection.JavaConversions._
 import com.google.gson.Gson
 import util.Logging
 import org.joda.time.DateTime
+import org.joda.time.format.ISODateTimeFormat
 
 object CrashLog extends Logging {
 
@@ -29,12 +30,14 @@ object CrashLog extends Logging {
    */
   def find : List[CrashLog] = {
     // fetch the data (transform this to a List[CrashLog])
-    val objs : Iterator[CrashLog] = for (obj <- Mongo.mongoColl.find()) yield {
+    val objs : Iterator[CrashLog] = for (obj <- Mongo.mongoColl.find().sort(MongoDBObject("lastDate" -> -1))) yield {
       // json serialization would be better
       val cl = new CrashLog
       cl.stackTrace = obj.getAs[String]("STACK_TRACE")
       cl.date = obj.getAs[DateTime]("USER_CRASH_DATE")
       cl.id = obj.getAs[ObjectId]("_id")
+      cl.count = obj.getAs[Int]("count")
+      cl.lastDate = obj.getAs[DateTime]("lastDate")
       cl
     }
 
@@ -52,6 +55,8 @@ object CrashLog extends Logging {
       cl.display = obj.get.getAs[String]("DISPLAY")
       cl.date = obj.get.getAs[DateTime]("USER_CRASH_DATE")
       cl.id = obj.get.getAs[ObjectId]("_id")
+      cl.count = obj.get.getAs[Int]("count")
+      cl.lastDate = obj.get.getAs[DateTime]("lastDate")
       return Option(cl)
     }
 
@@ -75,41 +80,36 @@ object CrashLog extends Logging {
     if (!params.isEmpty) {
 
       val stackTrace = params.get("STACK_TRACE")
-      var updateObj : MongoDBObject = null;
 
-      log.info("New stack trace found")
+      if (stackTrace.isDefined) {
+        // do a query
+        log.info("Checking for existing stack trace");
+        val query = MongoDBObject ("STACK_TRACE" -> stackTrace)
+        val inc = $inc("count" -> 1) ++ $set("lastDate" -> ISODateTimeFormat.dateTime().print(new DateTime()))
+        val existing = Mongo.mongoColl.findAndModify(query, inc);
 
-      // create a new object
-      val builder = MongoDBObject.newBuilder
-      params foreach (param => {
-          builder += param._1 -> param._2
-      })
+        if (existing.isDefined) {
+          log.info("Existing stack trace found and count incremented");
+        } else {
+          log.info("New stack trace found")
 
-      builder += "count" -> 1
-      updateObj = builder.result()
+          // create a new object
+          val builder = MongoDBObject.newBuilder
+          params foreach (param => {
+              builder += param._1 -> param._2
+          })
 
-//      if (stackTrace.isDefined) {
-//        // do a query
-//        log.info("Checking for existing stack trace");
-//        val query = MongoDBObject ("STACK_TRACE" -> stackTrace)
-//        val existing = Mongo.mongoColl.findOne(query)
-//
-//        // if existing one, up the count
-//        updateObj = existing.get
-//
-//        // increment the count
-//        updateObj ++ $inc("count" -> 1)
-//
-//        // todo: add a new date
-//
-//      } else {
-//
-//      }
+          builder += "count" -> 1
+          builder += "status" -> "new"
+          builder += "lastDate" -> ISODateTimeFormat.dateTime().print(new DateTime())
+          val updateObj = builder.result()
 
-      // seems weird, must be a way to set this
-      updateObj += ("status" -> "new")
+          log.info("Saving new trace")
+          Mongo.mongoColl.insert(updateObj);
+        }
+      }
 
-      Mongo.mongoColl.save(updateObj)
+
     } else {
       log.warn("bad request? did not find any valid fields")
     }
@@ -117,11 +117,13 @@ object CrashLog extends Logging {
 
 }
 
-class CrashLog () {
+class CrashLog  {
   var id : Option[ObjectId] = None
   var stackTrace : Option[String] = None
   var androidVersion : Option[String] = None
   var model : Option[String] = None
   var display : Option[String] = None
   var date : Option[DateTime] = None
+  var count : Option[Int] = None
+  var lastDate : Option[DateTime] = None
 }
