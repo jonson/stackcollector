@@ -5,39 +5,52 @@ import play.mvc._
 import util.Logging
 import com.mongodb.casbah.Imports._
 import collection.JavaConversions._
+import collection.mutable.HashMap
 import collection.mutable.HashSet
 import model.CrashLog
 import scala.concurrent.ops.spawn
-import collection.immutable.HashMap
 
 object Mongo {
   val mongoConn = MongoConnection()
-  val mongo = mongoConn("local_test")
-  val mongoColl = mongo("test_data")
+  val mongo = mongoConn("traces")
+  val mongoColl = new HashMap[String,MongoCollection]
+  mongoColl += "prod" -> mongo("prod")
+  mongoColl += "release" -> mongo("release")
+  mongoColl += "dev" -> mongo("dev")
+
 }
 
 object Application extends Controller with Logging {
     
   import views.Application._
+
+  private val validModes = new HashSet[String]
+  validModes += "prod"
+  validModes += "release"
+  validModes += "dev"
     
-  def index = {
+  def index (mode: String) = {
+
     // find the active stack traces
+    val isvalid = validModes(mode);
 
-    val traces = CrashLog.find
-
-    html.index (traces);
-
+    if (isvalid) {
+      val traces = CrashLog.find(mode)
+      html.index (mode, traces);
+    }
   }
 
-  def trace( id: String) = {
+  def trace(mode: String, id: String) = {
 
+    val isvalid = validModes(mode);
 
-    val trace = CrashLog.find(id)
+    if (isvalid) {
+      val trace = CrashLog.find(mode, id)
 
-    if (trace.isDefined) {
-      html.trace(trace.get)
+      if (trace.isDefined) {
+        html.trace(mode, trace.get)
+      }
     }
-
 
   }
 
@@ -47,7 +60,19 @@ object Collector extends Controller with Logging {
 
   // maintain a list of fields we'll accept
 
-	def android = {
+  def androidProd = {
+    android("prod")
+  }
+
+  def androidDev = {
+    android("dev")
+  }
+
+  def androidRelease = {
+    android("release")
+  }
+
+	def android (mode: String) = {
 
     log.debug("post request received")
 
@@ -64,7 +89,7 @@ object Collector extends Controller with Logging {
     spawn {
       // there must be a better way to do this, we could use a thread pool, ...  actor??
       log.info("Starting processing")
-      CrashLog.save(paramsCopy)
+      CrashLog.save(mode, paramsCopy)
       log.info("Processed")
     }
 

@@ -25,15 +25,14 @@ object CrashLog extends Logging {
   validCrashFields += "CUSTOM_DATA"
   validCrashFields += "APP_VERSION_NAME"
 
-
   def validField (name : String) : Boolean = validCrashFields.contains(name)
 
   /**
    * Fetches all logs in the system
    */
-  def find : List[CrashLog] = {
+  def find (mode: String) : List[CrashLog] = {
     // fetch the data (transform this to a List[CrashLog])
-    val objs : Iterator[CrashLog] = for (obj <- Mongo.mongoColl.find().sort(MongoDBObject("lastDate" -> -1))) yield {
+    val objs : Iterator[CrashLog] = for (obj <- Mongo.mongoColl(mode).find().sort(MongoDBObject("lastDate" -> -1))) yield {
       // json serialization would be better
       val cl = new CrashLog
       cl.stackTrace = obj.getAs[String]("STACK_TRACE")
@@ -47,9 +46,9 @@ object CrashLog extends Logging {
     return objs.toList
   }
 
-  def find ( id : String ) : Option[CrashLog] = {
+  def find (mode: String, id : String ) : Option[CrashLog] = {
     val query = MongoDBObject("_id" -> new ObjectId(id))
-    val obj = Mongo.mongoColl.findOne(query)
+    val obj = Mongo.mongoColl(mode).findOne(query)
     if (obj.isDefined) {
       val cl = new CrashLog
       cl.androidVersion = obj.get.getAs[String]("ANDROID_VERSION")
@@ -74,14 +73,14 @@ object CrashLog extends Logging {
   /**
    * Current # of logs in the system
    */
-  def count : Long = {
-    return Mongo.mongoColl.count
+  def count(mode : String) : Long = {
+    return Mongo.mongoColl(mode).count
   }
 
   /**
    * Saves an object to the db
    */
-  def save (params : Map[String,String]) : Unit = {
+  def save (mode: String, params : Map[String,String]) : Unit = {
 
     // first look for an existing object w/ this stack trace, see if we can update it
 
@@ -94,7 +93,7 @@ object CrashLog extends Logging {
         log.info("Checking for existing stack trace");
         val query = MongoDBObject ("STACK_TRACE" -> stackTrace)
         val inc = $inc("count" -> 1) ++ $set("lastDate" -> ISODateTimeFormat.dateTime().print(new DateTime()))
-        val existing = Mongo.mongoColl.findAndModify(query, inc);
+        val existing = Mongo.mongoColl(mode).findAndModify(query, inc);
 
         if (existing.isDefined) {
           log.info("Existing stack trace found and count incremented");
@@ -113,7 +112,7 @@ object CrashLog extends Logging {
           val updateObj = builder.result()
 
           log.info("Saving new trace")
-          Mongo.mongoColl.insert(updateObj);
+          Mongo.mongoColl(mode).insert(updateObj);
         }
       }
 

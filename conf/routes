@@ -4,10 +4,12 @@
 
 # Home page
 GET     /                                       404
-GET     /traces                                 Application.index
-GET     /trace/{id}                             Application.trace
+GET     /traces/{mode}                          Application.index
+GET     /traces/{mode}/{id}                     Application.trace
 
-POST	/collect/android						Collector.android
+POST	/collect/android/prod					Collector.androidProd
+POST	/collect/android/release				Collector.androidRelease
+POST	/collect/android/dev					Collector.androidDev
 
 # Ignore favicon requests
 GET     /favicon.ico                            404

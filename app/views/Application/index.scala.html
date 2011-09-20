@@ -1,11 +1,11 @@
-@(traces:List[model.CrashLog])
+@(mode:String, traces:List[model.CrashLog])
 
 
 @main("Stack Collector") {
 
     <ul>
         @for(trace <- traces) {
-            <li>@trace.date <a href="@action(controllers.Application.trace(trace.id.get.toString()))">@trace.id.get</a> @trace.count</li>
+            <li>@trace.date <a href="@action(controllers.Application.trace(mode, trace.id.get.toString()))">@trace.id.get</a> @trace.count</li>
         }
     </ul>
 
