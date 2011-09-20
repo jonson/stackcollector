@@ -52,10 +52,10 @@ object Collector extends Controller with Logging {
     log.debug("post request received")
 
     // strip out the body param, seems to be included
-//    val params = request.params.allSimple filter (param => !param._1.eq("body") && CrashLog.validField(param._1))
+    val params = request.params.allSimple filter (param => !param._1.eq("body") && CrashLog.validField(param._1))
 
     // temp disable valid params check
-    val params = request.params.allSimple filter (param => !param._1.eq("body"))
+
 
     // take a copy, not sure how safe the params object is in play
     val paramsCopy = collection.immutable.Map() ++ params

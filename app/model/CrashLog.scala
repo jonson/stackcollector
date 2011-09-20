@@ -22,6 +22,9 @@ object CrashLog extends Logging {
   validCrashFields += "DISPLAY"
   validCrashFields += "APP_VERSION_CODE"
   validCrashFields += "REPORT_ID"
+  validCrashFields += "CUSTOM_DATA"
+  validCrashFields += "APP_VERSION_NAME"
+
 
   def validField (name : String) : Boolean = validCrashFields.contains(name)
 
