@@ -57,6 +57,11 @@ object CrashLog extends Logging {
       cl.id = obj.get.getAs[ObjectId]("_id")
       cl.count = obj.get.getAs[Int]("count")
       cl.lastDate = obj.get.getAs[DateTime]("lastDate")
+      cl.developerMode = obj.get.getAs[String]("DEVELOPER_MODE")
+      cl.mode = obj.get.getAs[String]("MODE")
+
+      // TODO: missing APP_VERSION_CODE from ACRA
+
       return Option(cl)
     }
 
@@ -121,9 +126,12 @@ class CrashLog  {
   var id : Option[ObjectId] = None
   var stackTrace : Option[String] = None
   var androidVersion : Option[String] = None
+  var version : Option[String] = None
   var model : Option[String] = None
   var display : Option[String] = None
   var date : Option[DateTime] = None
   var count : Option[Int] = None
   var lastDate : Option[DateTime] = None
+  var mode : Option[String] = None
+  var developerMode : Option[String] = None
 }
