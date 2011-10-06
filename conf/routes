@@ -4,8 +4,10 @@
 
 # Home page
 GET     /                                       404
-GET     /traces/{mode}                          Application.index
-GET     /traces/{mode}/{id}                     Application.trace
+GET     /traces/{mode}/?                        Application.index
+GET     /traces/{mode}/crash/{id}               Application.crashreport
+
+POST    /traces/{mode}/status/{id}              Application.changeStatus
 
 POST	/collect/android/prod					Collector.androidProd
 POST	/collect/android/release				Collector.androidRelease

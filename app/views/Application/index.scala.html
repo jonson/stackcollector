@@ -1,15 +1,35 @@
-@(mode:String, traces:List[model.CrashLog])
-
+@(
+    mode:String,
+    reports:List[model.CrashReport]
+)(
+    implicit
+    params:play.mvc.Scope.Params,
+    flash:play.mvc.Scope.Flash
+)
 
 @main("Stack Collector") {
 
-    <ul>
-        @for(trace <- traces) {
-            <li>@trace.date <a href="@action(controllers.Application.trace(mode, trace.id.get.toString()))">@trace.id.get</a> @trace.count</li>
-        }
-    </ul>
+    <h2>Crash errors</h2>
 
+    <div class="feedbackTable">
 
+            @flash.put("evenOdd", "odd")
+            @for(report <- reports) {
+                <div class='feedbackRow @flash.get("evenOdd")'>
+                    <div class="left status"><span>@report.status</span></div>
+                    <div class="left summary"><a href="@action(controllers.Application.crashreport(mode, report.id.toString()))"><span>@report.summary</span></a></div>
+                    <div class="left count"><span>@report.numReports</span></div>
+                    <div class="left date"><span>@report.lastDate</span></div>
+                    <div class="clear"></div>
+                </div>
+                @if(flash.get("evenOdd") == "even") {
+                    @flash.put("evenOdd", "odd")
+                } else {
+                    @flash.put("evenOdd", "even")
+                }
+            }
+
+    </div>
 }
 
 

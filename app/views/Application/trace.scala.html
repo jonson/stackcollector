@@ -1,21 +1,9 @@
-@(mode:String, trace:model.CrashLog)
+@(mode:String, report:model.CrashReport)
 
 
 @main("Stack Collector") {
 
-    <ul>
-        <li>Android Version: @trace.androidVersion</li>
-        <li>Phone Model: @trace.model</li>
-        <li>Display: @trace.display</li>
-        <li>Initially Reported: @trace.date</li>
-        <li>Last Reported: @trace.lastDate</li>
-        <li>Number of Reports: @trace.count</li>
-    </ul>
-
-    <ul class="code">
-        <li><pre>@trace.stackTrace</pre></li>
-    </ul>
-
+        hello
 
 }
 

@@ -1,5 +1,53 @@
 /* start of ol code block style */
 
+div.feedbackTable {
+  margin: 0 .8em;
+  padding: 0;
+  border: #dadada 1px solid;
+  border-radius: 3px;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+}
+
+div.feedbackRow {
+    padding: 0.4em 0.8em 0.4em 0.8em;
+}
+
+div.odd {
+    background-color: #EEE;
+}
+
+div.left {
+    float: left;
+}
+
+div.clear {
+    clear: both;
+}
+
+div.status {
+    width: 10%;
+}
+
+div.summary {
+    width: 50%;
+}
+
+div.count {
+    width: 10%;
+}
+
+div.date {
+    width: 20%;
+}
+
+body {
+  font: normal .8em Arial, sans-serif;
+  color: #555;
+  margin: 3px 10px 10px 10px;
+  max-width: 960px;
+}
+
 ul.code {
    list-style-type: none;
    margin: 2em;
@@ -17,4 +65,56 @@ ul.code li {
    color: #000;
    background: #eee;
    width: auto;
+}
+
+.crashReportHeader {
+  margin: .1em 0 .6em .6em;
+  font-size: 1.4em;
+  font-weight: bold;
+}
+
+.crashReportTable {
+  margin: 0 .8em;
+  padding: 0;
+  border: #dadada 1px solid;
+  border-radius: 3px;
+  -moz-border-radius: 3px;
+  -webkit-border-radius: 3px;
+  padding-bottom: 1em;
+}
+
+.tableheader {
+  color: #a5c739;
+  font-weight: bold;
+  font-size: 1.2em;
+  margin: .4em;
+}
+
+.GI-GK15DI2 {
+float: left;
+width: 27%;
+font-weight: bold;
+text-align: right;
+}
+
+.GI-GK15DG2 {
+float: right;
+width: 70%;
+}
+
+pre.code {
+padding: 0 1.8em 2em;
+font-family: Courier, monospace;
+overflow-x: auto;
+}
+
+.button {
+float: right;
+font-weight: bold;
+margin: 0.8em 0 2em;
+padding: 0.3em;
+cursor: pointer;
+border-radius: 8px;
+-moz-border-radius: 8px;
+-webkit-border-radius: 8px;
 }

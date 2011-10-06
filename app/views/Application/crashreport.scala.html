@@ -1,0 +1,105 @@
+@(
+mode:String,
+report:model.CrashReport,
+logs:List[model.CrashLog]
+)(
+    implicit
+    params:play.mvc.Scope.Params,
+    flash:play.mvc.Scope.Flash
+)
+
+@main("Stack Collector") {
+
+    > <a href="@action(controllers.Application.index(mode))">Home</a>
+
+<script>
+
+    function changeStatus() {
+        // figure out which one is visible
+        return "new";
+    }
+
+    $(document).ready(function() {
+
+        $('#statusButton').click(function() {
+            $('form#changeStatus').submit();
+        });
+
+        return false;
+    });
+
+</script>
+
+    <div class="crashReportHeader"><span>@report.summary</span> in APP NAME</div>
+
+
+    <div>
+        <div class="crashReportTable">
+            <div class="tableheader">Crash</div>
+
+            <div class="GI-GK15DH2">
+                <div class="GI-GK15DI2">Exception class</div>
+                <div class="GI-GK15DG2">@report.summary</div>
+                <div class="clear"></div>
+            </div>
+
+            <div class="GI-GK15DH2">
+                <div class="GI-GK15DI2">Source method</div>
+                <div class="GI-GK15DG2">UNKNOWN</div>
+                <div class="clear"></div>
+            </div>
+        </div>
+
+        <div id="statusButton" class="button">
+            <form id="changeStatus" name="changeStatus" action='@action(controllers.Application.changeStatus(mode, report.id.toString))' method="post">
+            @if(report.status.toLowerCase == "new") {
+                <input name="status" value="old" type="hidden" />
+                <div>
+                    <img src="@asset("public/images/check.png")">
+                </div>
+                <div>Mark as old</div>
+            } else {
+                <input name="status" value="new" type="hidden" />
+                <div>
+                    <img src="@asset("public/images/exclamation.png")">
+                </div>
+                <div>Mark as new</div>
+            }
+            </form>
+        </div>
+
+        <div class="clear"></div>
+
+        <div class="crashReportTable">
+            <div class="tableheader">Stack trace</div>
+            <pre class="code">@report.stackTrace</pre>
+        </div>
+
+        <div class="crashReportTable">
+            <div class="tableheader">Instances</div>
+
+            @flash.put("evenOdd", "odd")
+            @for(log <- logs) {
+                <div class='feedbackRow @flash.get("evenOdd")'>
+                    <div class="left status"><span>@log.version</span></div>
+                    <div class="left summary"><span>@log.androidVersion</span></div>
+                    <div class="left count"><span>@log.model</span></div>
+                    <div class="left date"><span>@log.date</span></div>
+                    <div class="clear"></div>
+                </div>
+
+                @if(flash.get("evenOdd") == "even") {
+                    @flash.put("evenOdd", "odd")
+                } else {
+                    @flash.put("evenOdd", "even")
+                }
+            }
+
+        </div>
+    </div>
+
+
+
+}
+
+
