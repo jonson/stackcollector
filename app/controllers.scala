@@ -9,9 +9,10 @@ import collection.mutable.HashMap
 import collection.mutable.HashSet
 import scala.concurrent.ops.spawn
 import model.{CrashLog, CrashReport}
+import com.mongodb.casbah.MongoURI
 
 object Mongo {
-  val mongoConn = MongoConnection()
+  val mongoConn = MongoConnection(MongoURI("mongodb://test:password@staff.mongohq.com:10067/stackcollector1"))
   val mongo = mongoConn("traces")
   val crashlogs = new HashMap[String,MongoCollection]
   crashlogs += "prod" -> mongo("prod_logs")
