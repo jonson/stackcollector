@@ -12,8 +12,14 @@ import model.{CrashLog, CrashReport}
 import com.mongodb.casbah.MongoURI
 
 object Mongo {
-  val mongoConn = MongoConnection(MongoURI("mongodb://test:password@staff.mongohq.com:10067/stackcollector1"))
-  val mongo = mongoConn("traces")
+  val mongoUri = MongoURI("mongodb://localhost")
+  val mongoConn = MongoConnection(mongoUri)
+  val mongo = mongoConn.getDB("traces")
+
+//  if (mongo.authenticate("test", "password")) {
+//
+//  }
+
   val crashlogs = new HashMap[String,MongoCollection]
   crashlogs += "prod" -> mongo("prod_logs")
   crashlogs += "release" -> mongo("release_logs")
@@ -119,6 +125,16 @@ object Application extends Controller with Logging {
     } else {
       log.info("invalid mode: " + mode)
     }
+  }
+
+  def findUniquePackages(mode: String) = {
+
+    log.info("Find unique packages")
+
+    val values = CrashReport.findUniquePackages(mode)
+
+    log.info(values.toString)
+    // do something here
   }
 
 }

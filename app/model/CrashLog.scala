@@ -42,6 +42,8 @@ object CrashReport extends Logging {
       cr.originalDate = obj.getAs[DateTime]("originalDate")
       cr.lastDate = obj.getAs[DateTime]("lastDate")
       cr.status = obj.getAs[String]("status").getOrElse("NEW")
+      cr.packageName = obj.getAs[String]("packageName").getOrElse("UNKNOWN")
+
       var instances = obj.getAs[BasicDBList]("instances").get.toList
       var aslist = instances.collect { case s: ObjectId => s}
       cr.instances = aslist
@@ -77,6 +79,21 @@ object CrashReport extends Logging {
     return None
   }
 
+  def findUniquePackages(mode: String) : Seq[String] ={
+
+    val packages = Mongo.crashreports(mode).distinct("packageName")
+
+    val pkgs = scala.collection.mutable.Set.empty[String]
+
+    // Seq[String] vs List[String]
+    for (pkg <- packages) {
+      pkgs + pkg.toString
+    }
+
+    log.info(pkgs.toString)
+    return pkgs.toSeq
+  }
+
   def findCrashReport (mode: String, id : String ) : Option[CrashReport] = {
     val query = MongoDBObject("_id" -> new ObjectId(id))
     val objOption = Mongo.crashreports(mode).findOne(query)
@@ -93,6 +110,7 @@ object CrashReport extends Logging {
       cr.originalDate = obj.getAs[DateTime]("originalDate")
       cr.lastDate = obj.getAs[DateTime]("lastDate")
       cr.status = obj.getAs[String]("status").getOrElse("NEW")
+      cr.packageName = obj.getAs[String]("packageName").getOrElse("UNKNOWN")
 
       var instances = obj.getAs[BasicDBList]("instances").get.toList
       var aslist = instances.collect { case s: ObjectId => s}
@@ -122,6 +140,7 @@ object CrashReport extends Logging {
     if (!params.isEmpty) {
 
       val stackTrace = params.get("STACK_TRACE")
+      val packageName = params.getOrElse("PACKAGE_NAME", "UNKNOWN")
 
       if (stackTrace.isDefined) {
 
@@ -138,7 +157,11 @@ object CrashReport extends Logging {
         // need the object id from crashlogs
         val id = stobj.getAs[ObjectId]("_id").get
 
-        val query = MongoDBObject ("stackTrace" -> stackTrace)
+        val queryBuilder = MongoDBObject.newBuilder
+        queryBuilder += "packageName" -> packageName
+        queryBuilder += "stackTrace" -> stackTrace
+
+        val query = queryBuilder.result()
 
         val now = ISODateTimeFormat.dateTime().print(new DateTime())
         val inc = $set("lastDate" -> now) ++ $set("status" -> "new") ++ $push("instances" -> id)
@@ -157,6 +180,7 @@ object CrashReport extends Logging {
           builder += "originalDate" -> now
           builder += "lastDate" -> now
           builder += "stackTrace" -> stackTrace
+          builder += "packageName" -> packageName
 
           log.info("Saving new crash report")
           Mongo.crashreports(mode).insert(builder.result());
@@ -210,6 +234,11 @@ case class CrashReport(id : ObjectId, stackTrace : String) {
    * Last date it was reported
    */
   var lastDate : Option[DateTime] = None
+
+  /**
+   * Package name of the app
+   */
+  var packageName : String = "UNKNOWN";
 
   def numReports() : Int = {
     return instances.size()

@@ -4,6 +4,7 @@
 
 # Home page
 GET     /                                       404
+GET     /env/{mode}/?                           Application.findUniquePackages
 GET     /traces/{mode}/?                        Application.index
 GET     /traces/{mode}/crash/{id}               Application.crashreport
 
